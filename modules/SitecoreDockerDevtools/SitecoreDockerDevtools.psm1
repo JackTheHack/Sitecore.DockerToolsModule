@@ -21,6 +21,7 @@ function Build-SitecoreSupportPackage {
 function Read-SitecoreCacheStats
 {
     $healthLogsPath = "C:\inetpub\wwwroot\App_Data\diagnostics\health_monitor"
+    #$healthLogsPath = ".\sample\"
     $cacheStatsFile = Get-ChildItem -Path $healthLogsPath | Where-Object { $_.Name.StartsWith("CacheStatus")} | Sort-Object -Property "LastWriteTime" -Descending | Select-Object -First 1
     $fileContent = Get-Content "$healthLogsPath\$($cacheStatsFile.Name)"
     $fileHeader = $fileContent | Select-Object -First 2
@@ -64,6 +65,7 @@ function Read-SitecoreCacheStats
 function Read-SitecoreRenderingStats
 {
     $healthLogsPath = "C:\inetpub\wwwroot\App_Data\diagnostics\health_monitor"
+    #$healthLogsPath = ".\sample\"
     $statsFile = Get-ChildItem -Path $healthLogsPath | Where-Object { $_.Name.StartsWith("RenderingsStatistics")} | Sort-Object -Property "LastWriteTime" -Descending | Select-Object -First 1
     $tableContents = Get-Content "$healthLogsPath\$($statsFile.Name)"        
 
@@ -75,12 +77,15 @@ function Read-SitecoreRenderingStats
 
         $rows | Select-Object -Skip 1 | ForEach-Object {             
             $nameXml = $_.ChildNodes[0].InnerText
+            $nameXml = $nameXml.Substring(0, [Math]::Min($nameXml.Length, 50))
+
             $siteXml = $_.ChildNodes[1].InnerText
-            $countXml = $_.ChildNodes[2]
-            $fromCacheXml = $_.ChildNodes[3]
-            $avgTimeXml = $_.ChildNodes[4]
-            $totalTimeXml = $_.ChildNodes[8]
-            $lastRunXml = $_.ChildNodes[10]
+            $countXml = $_.ChildNodes[2].InnerText
+            $fromCacheXml = $_.ChildNodes[3].InnerText
+            $avgTimeXml = [int]$_.ChildNodes[4].InnerText
+            $maxTimeXml = [int]$_.ChildNodes[6].InnerText
+            $totalTimeXml = $_.ChildNodes[8].InnerText
+            $lastRunXml = $_.ChildNodes[10].InnerText
             
             
             $newEntry = @{
@@ -89,6 +94,7 @@ function Read-SitecoreRenderingStats
                 Count = $countXml;
                 FromCache = $fromCacheXml;
                 AvgTime = $avgTimeXml;
+                MaxTime = $maxTimeXml;
                 TotalTime = $totalTimeXml;
                 LastRun = $lastRunXml
             };

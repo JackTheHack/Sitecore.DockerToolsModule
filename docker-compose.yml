@@ -1,0 +1,10 @@
+version: "2.4"
+services:   
+  custom-tools:
+    image: custom-tools/sitecore-docker-tools-module
+    build:
+      context: .
+      isolation: hyperv      
+      dockerfile: ./Dockerfile      
+    scale: 0
+  
